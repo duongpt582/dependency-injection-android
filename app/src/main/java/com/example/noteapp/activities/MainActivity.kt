@@ -2,30 +2,40 @@ package com.example.noteapp.activities
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.noteapp.NoteApplication
 import com.example.noteapp.R
 import com.example.noteapp.adapter.NoteAdapter
 import com.example.noteapp.databinding.ActivityMainBinding
+import com.example.noteapp.di.DaggerAppComponent
 import com.example.noteapp.model.Note
 import com.example.noteapp.viewmodel.NoteViewModel
-import kotlinx.android.synthetic.main.activity_main.*
+import javax.inject.Inject
+
+private const val TAG = "AppComponent"
 
 class MainActivity : AppCompatActivity() {
 
-    private val noteViewModel: NoteViewModel by lazy {
-        ViewModelProvider(
-            this,
-            NoteViewModel.NoteViewModelFactory(this.application)
-        )[NoteViewModel::class.java]
-    }
+    @Inject
+    lateinit var noteViewModel: NoteViewModel
+
     private lateinit var binding: ActivityMainBinding
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
+
+//        val appComponent = DaggerAppComponent.builder().application(application).build()
+        val appComponent = (application as NoteApplication).component
+        appComponent.inject(this@MainActivity)
+
+
+        Log.d(TAG, "repository: ${noteViewModel.noteRepository}, view model: $noteViewModel")
+
 
         initControls()
         initEvents()
@@ -45,9 +55,9 @@ class MainActivity : AppCompatActivity() {
         binding.rvNote.layoutManager = LinearLayoutManager(this)
         binding.rvNote.adapter = adapter
 
-        noteViewModel.getAllNote().observe(this, {
-            adapter.setNotes(it)
-        })
+//        noteViewModel.getAllNote().observe(this, {
+//            adapter.setNotes(it)
+//        })
 
     }
 
@@ -58,6 +68,6 @@ class MainActivity : AppCompatActivity() {
 
     }
     private val onItemDelete: (Note) -> Unit = {
-        noteViewModel.deleteNote(it)
+//        noteViewModel.deleteNote(it)
     }
 }
